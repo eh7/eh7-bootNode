@@ -1,0 +1,94 @@
+<html>
+<header>
+  <title>eh7 workshop - control centre</title>
+<header>
+<body>
+<center>
+<h1>eh7 workshop</h1>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+function switchBoiler(status, script_url) {
+
+  setTimeout(function(){ 
+    if(status == 1){
+      location.href = script_url + "?boiler=off";
+      
+    } else {
+      location.href = script_url + "?boiler=on";
+    }
+  }, 500);
+
+}
+</script>
+<header>
+  <style>
+    .onoffswitch {
+        position: relative; width: 350px;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    }
+    .onoffswitch-checkbox {
+        display: none;
+    }
+    .onoffswitch-label {
+        display: block; overflow: hidden; cursor: pointer;
+        border: 2px solid #999999; border-radius: 20px;
+    }
+    .onoffswitch-inner {
+        display: block; width: 200%; margin-left: -100%;
+        transition: margin 0.3s ease-in 0s;
+    }
+    .onoffswitch-inner:before, .onoffswitch-inner:after {
+        display: block; float: left; width: 50%; height: 75px; padding: 0; line-height: 75px;
+        font-size: 40px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+        box-sizing: border-box;
+    }
+    .onoffswitch-inner:before {
+        content: "BOILER ON";
+        padding-left: 50px;
+        background-color: #ff0000; color: #FFFFFF;
+        text-align: left;
+    }
+    .onoffswitch-inner:after {
+        content: "BOILER OFF";
+        padding-right: 35px;
+        background-color: #EEEEEE; color: #999999;
+        text-align: right;
+    }
+    .onoffswitch-switch {
+        display: block; width: 18px; margin: 28.5px;
+        background: #FFFFFF;
+        position: absolute; top: 0; bottom: 0;
+        right: 271px;
+        border: 2px solid #999999; border-radius: 20px;
+        transition: all 0.3s ease-in 0s; 
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+        margin-left: 0;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+        right: 0px; 
+    }
+  </style>
+</header>
+
+<h4><a href="/">reload</a><h4>
+<h4><div id='time'></div></h4>
+<script>
+  var today = new Date()
+  document.getElementById('time').innerHTML = today
+</script>
+    <div class="onoffswitch">
+        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked onclick="switchBoiler(1,'')">
+        <label class="onoffswitch-label" for="myonoffswitch">
+            <span class="onoffswitch-inner"></span>
+            <span class="onoffswitch-switch"></span>
+        </label>
+    </div>
+<h3>The Boiler is <b>on</b>.</h3><h4><a href="/?boiler=off">switch off<a></h4>
+</center>
+<form method='post'>
+<input type=hidden name="test" value="okay">
+<input type=submit>
+</form>
+</body>
+</html>

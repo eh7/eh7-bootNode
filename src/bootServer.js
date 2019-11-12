@@ -7,6 +7,23 @@ const pull = require('pull-stream')
 const Pushable = require('pull-pushable')
 const p = Pushable()
 
+//const Hapi = require('./server.js')
+const Hapi = require('./ejsServer.js')
+
+/*
+const readline = require('readline')
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
+
+rl.question('What do you think of Node.js? ', (answer) => {
+  console.log(`You entered: ${answer}`);
+  rl.close();
+})
+*/
+
 const bootNode0Id = require('./peer-id-bootServer0')
 
 PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
@@ -49,6 +66,7 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
       console.log("peer:connect: ", peer.id.toB58String())
 //      bootNode.pubsub.publish('info',Buffer.from(`hello from ${peer.id.toB58String()}`),(err) => {if(err) console.log(err)})
 
+
       bootNode.dialProtocol(peer.id, '/eh7/cmd/0.0.1', (err, conn) => {
         var cmd = "gpio -g read 21"
         console.log("test dial to '/eh7/cmd/0.0.1' :: "  + cmd)
@@ -61,6 +79,7 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
           })
         )
       })
+
     })
 
     bootNode.on('peer:disconnect', (peer) => {
@@ -84,3 +103,4 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
     })
   }
 })
+
