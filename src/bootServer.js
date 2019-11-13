@@ -6,9 +6,10 @@ const PeerId   = require('peer-id')
 const pull = require('pull-stream')
 const Pushable = require('pull-pushable')
 const p = Pushable()
+  
+let bootNode
+let peers = []
 
-//const Hapi = require('./server.js')
-const Hapi = require('./ejsServer.js')
 
 /*
 const readline = require('readline')
@@ -32,7 +33,7 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
 
     const bootNodeInfo = new PeerInfo(bootNodeId)
     bootNodeInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
-    var bootNode = new Libp2pNode({
+    bootNode = new Libp2pNode({
       peerInfo: bootNodeInfo
     })
 
@@ -66,9 +67,12 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
       console.log("peer:connect: ", peer.id.toB58String())
 //      bootNode.pubsub.publish('info',Buffer.from(`hello from ${peer.id.toB58String()}`),(err) => {if(err) console.log(err)})
 
+      peers.push(peer)
+
 
       bootNode.dialProtocol(peer.id, '/eh7/cmd/0.0.1', (err, conn) => {
         var cmd = "gpio -g read 21"
+//        var cmd = "gpio -g write 21 0"
         console.log("test dial to '/eh7/cmd/0.0.1' :: "  + cmd)
         pull(
           pull.values([cmd]),
@@ -104,3 +108,106 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
   }
 })
 
+const switchBoilerOn = () => {
+  bootNode.dialProtocol(peers[0].id, '/eh7/cmd/0.0.1', (err, conn) => {
+    var cmd = "gpio -g write 21 1"
+    console.log("test dial to '/eh7/cmd/0.0.1' :: "  + cmd)
+    pull(
+      pull.values([cmd]),
+      conn,
+      pull.collect((err, data) => {
+        if (err) { throw err }
+        console.log('data received: ', data.toString())
+        getBoilerPowerStatus() 
+        console.log("Boiler is 'on'.")
+      })
+    )
+  })
+}
+
+const switchBoilerOff = () => {
+  bootNode.dialProtocol(peers[0].id, '/eh7/cmd/0.0.1', (err, conn) => {
+//    console.log(param.test)
+    var cmd = "gpio -g write 21 0"
+    console.log("test dial to '/eh7/cmd/0.0.1' :: "  + cmd)
+    pull(
+      pull.values([cmd]),
+      conn,
+      pull.collect((err, data) => {
+        if (err) { throw err }
+        console.log('data received: ', data.toString())
+        getBoilerPowerStatus() 
+        console.log("Boiler is 'off'.")
+      })
+    )
+  })
+}
+
+const getBoilerPowerStatus = () => {
+  bootNode.dialProtocol(peers[0].id, '/eh7/cmd/0.0.1', (err, conn) => {
+    var cmd = "gpio -g read 21"
+    console.log("test dial to '/eh7/cmd/0.0.1' :: "  + cmd)
+    pull(
+      pull.values([cmd]),
+      conn,
+      pull.collect((err, data) => {
+        if (err) { throw err }
+        console.log('data received: ', data.toString())
+
+        var boilerStatus = "off"
+        const returnStatus = data.toString()
+        if(returnStatus === '1') boilerStatus = 'on'
+        console.log("The boiler in '" + boilerStatus + "'.")
+      })
+    )
+  })
+}
+
+
+const server = require('./ejsServer.js')
+
+server.route({
+  method: 'GET',
+  path: '/1',
+  handler: (request, h) => {
+    console.log(1)
+    return 'Hello World NUMBER 1!';
+  }
+})
+
+const controlPostHandler = (request, h) => {
+  let param = request.payload
+  Object.keys(param).forEach(function (name) {
+    var value = param[name]
+    console.log(name + "=" + value)
+  })
+//  if(typeof param.test !== 'undefined')
+//    console.log(param.test)
+  return h.view('control', {})
+}
+
+const controlGetHandler = (request, h) => {
+  let param = request.query
+  Object.keys(param).forEach(function (name) {
+    var value = param[name]
+    console.log(name + "=" + value)
+  })
+
+  if(typeof peers[0] !== 'undefined'){
+   if(param.boiler === 'status')
+    getBoilerPowerStatus()
+   else if(param.boiler === 'on')
+    switchBoilerOn()
+   else if(param.boiler === 'off')
+    switchBoilerOff()
+   else
+     console.log("Loading, do nothing!!!")
+  } else 
+    console.log("No peer defined!!!")
+  
+
+  return h.view('control', {})
+}
+
+server.route({ method: 'GET', path: '/', handler: controlGetHandler })
+server.route({ method: 'POST', path: '/', handler: controlPostHandler })

@@ -1,3 +1,5 @@
+
+
 const Path = require('path')
 const Hapi = require('@hapi/hapi')
 const Inert = require('@hapi/inert')
@@ -17,6 +19,7 @@ const users = [
 ]
 */
 
+
 const server = Hapi.server({
   port: 3000,
   host: 'localhost',
@@ -27,6 +30,8 @@ const server = Hapi.server({
   }
 })
 
+module.exports = server
+
 const rootHandler = (request, h) => {
   return h.view('index', {
     title: 'ejs | Hapi ' + request.server.version,
@@ -34,6 +39,7 @@ const rootHandler = (request, h) => {
   })
 }
 
+/*
 const controlPostHandler = (request, h) => {
   let param = request.payload 
   if(typeof param.test !== 'undefined')
@@ -42,7 +48,7 @@ const controlPostHandler = (request, h) => {
 }
 
 const controlHandler = (request, h) => {
-  let param = request.query || request.payload 
+  let param = request.query
   if(typeof param.boiler !== 'undefined')
     console.log(param['boiler'])
   return h.view('control', {
@@ -51,6 +57,10 @@ const controlHandler = (request, h) => {
   })
 }
 
+server.route({ method: 'GET', path: '/', handler: controlHandler })
+server.route({ method: 'POST', path: '/', handler: controlPostHandler })
+*/
+
 const init = async () => {
     await server.register([Vision,Inert])
     server.views({
@@ -58,9 +68,6 @@ const init = async () => {
       relativeTo: __dirname,
       path: '../ejs'
     })
-//    server.route({ method: 'GET', path: '/', handler: rootHandler })
-    server.route({ method: 'GET', path: '/', handler: controlHandler })
-    server.route({ method: 'POST', path: '/', handler: controlPostHandler })
     server.route({
         method: 'GET',
         path: '/{param*}',
@@ -77,6 +84,7 @@ const init = async () => {
     await server.start()
     console.log('Server running on %s', server.info.uri);
 }
+
 process.on('unhandledRejection', (err) => {
     console.log(err);
     process.exit(1);
