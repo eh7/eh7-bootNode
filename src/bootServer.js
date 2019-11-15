@@ -32,7 +32,7 @@ PeerId.createFromJSON(bootNode0Id,(err,bootNodeId) => {
   else {
 
     const bootNodeInfo = new PeerInfo(bootNodeId)
-    bootNodeInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
+    bootNodeInfo.multiaddrs.add('/ip4/10.0.0.4/tcp/10333')
     bootNode = new Libp2pNode({
       peerInfo: bootNodeInfo
     })
@@ -156,7 +156,7 @@ const getBoilerPowerStatus = () => {
 
         var boilerStatus = "off"
         const returnStatus = data.toString()
-        if(returnStatus === '1') boilerStatus = 'on'
+        if(returnStatus == 1) boilerStatus = 'on'
         console.log("The boiler in '" + boilerStatus + "'.")
       })
     )
